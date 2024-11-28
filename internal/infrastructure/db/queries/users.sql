@@ -22,3 +22,9 @@ SELECT u.id, u.email, w.id, w.address
 FROM users u
 LEFT JOIN wallets w ON u.id = w.user_id
 WHERE u.id = $1 LIMIT 1;
+
+-- name: GetUserByAddress :one
+SELECT u.id, u.email, u.name, w.id
+FROM users u
+LEFT JOIN wallets w ON u.id = w.user_id
+WHERE w.address = $1 LIMIT 1;

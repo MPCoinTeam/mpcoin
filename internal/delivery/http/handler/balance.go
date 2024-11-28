@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"mpc/internal/usecase"
 	"mpc/pkg/utils"
 	"net/http"
@@ -9,7 +10,6 @@ import (
 	"github.com/google/uuid"
 )
 
-
 type BalanceHandler struct {
 	blcUC usecase.BalanceUseCase
 }
@@ -17,7 +17,6 @@ type BalanceHandler struct {
 func NewBalanceHandler(blcUC usecase.BalanceUseCase) *BalanceHandler {
 	return &BalanceHandler{blcUC: blcUC}
 }
-
 
 // GetBalances godoc
 // @Summary Get balances by wallet id
@@ -32,7 +31,9 @@ func NewBalanceHandler(blcUC usecase.BalanceUseCase) *BalanceHandler {
 // @Router /balances [get]
 func (h *BalanceHandler) GetBalances(c *gin.Context) {
 	//get user id from context
+	fmt.Println(123)
 	userId := c.MustGet("userID").(uuid.UUID)
+	fmt.Println(userId)
 	if userId == uuid.Nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return

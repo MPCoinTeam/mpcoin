@@ -10,7 +10,7 @@ SQLC := sqlc
 
 # Docker Compose files
 DOCKER_COMPOSE_FILE := docker-compose.yml
-DOCKER_COMPOSE_KAFKA_FILE := docker-compose.kafka.yml
+DOCKER_COMPOSE_KAFKA_FILE := docker-compose-kafka.yml
 
 # Go commands
 API_CMD := cmd/api/main.go

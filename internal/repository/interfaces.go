@@ -16,6 +16,7 @@ type UserRepository interface {
 	CreateUser(ctx context.Context, params domain.CreateHashedUserParams) (domain.User, error)
 	GetUser(ctx context.Context, id uuid.UUID) (domain.User, error)
 	GetUserByEmail(ctx context.Context, email string) (domain.User, error)
+	GetUserByAddress(ctx context.Context, address string) (domain.UserWithWallet, error)
 	UpdateUser(ctx context.Context, user domain.User) (domain.User, error)
 	GetUserWithWallet(ctx context.Context, id uuid.UUID) (domain.UserWithWallet, error)
 	DBTransaction

@@ -14,6 +14,7 @@ type UserUseCase interface {
 	GetUser(ctx context.Context, id uuid.UUID) (domain.User, error)
 	UpdateUser(ctx context.Context, params domain.UpdateUserParams) (domain.User, error)
 	GetUserWallet(ctx context.Context, id uuid.UUID) (domain.UserWithWallet, error)
+	GetUserByAddress(ctx context.Context, address string) (domain.UserWithWallet, error)
 }
 
 type userUseCase struct {
@@ -54,9 +55,17 @@ func (uc *userUseCase) UpdateUser(ctx context.Context, params domain.UpdateUserP
 
 func (uc *userUseCase) GetUserWallet(ctx context.Context, id uuid.UUID) (domain.UserWithWallet, error) {
 	user, err := uc.userRepo.GetUserWithWallet(ctx, id)
-	
+
 	user.Avatar = "https://robohash.org/af424cffba2a77572a76dc071c0799dc?set=set4&bgset=&size=400x400"
 	user.Name = "John Doe"
+	return user, err
+}
 
+func (uc *userUseCase) GetUserByAddress(ctx context.Context, address string) (domain.UserWithWallet, error) {
+	user, err := uc.userRepo.GetUserByAddress(ctx, address)
+	user.Avatar = "https://robohash.org/af424cffba2a77572a76dc071c0799dc?set=set4&bgset=&size=400x400"
+	if user.Name == "" {
+		user.Name = "John Doe"
+	}
 	return user, err
 }

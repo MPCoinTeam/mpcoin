@@ -6,7 +6,9 @@ import (
 	"mpc/internal/infrastructure/auth"
 	"mpc/internal/usecase"
 	"net/http"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	swaggerFiles "github.com/swaggo/files"
@@ -25,7 +27,18 @@ func NewRouter(
 
 	router := gin.Default()
 	// router.Use(middleware.LoggerMiddleware(log))
-	router.Use(middleware.CORS())
+	// router.Use(middleware.CORS())
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "PUT", "POST", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		AllowOriginFunc: func(origin string) bool {
+			return true
+		},
+		MaxAge: 12 * time.Hour,
+	}))
 	router.Use(gin.Recovery())
 
 	healthHandler := handler.NewHealthHandler()
@@ -56,6 +69,7 @@ func NewRouter(
 		users.Use(middleware.AuthMiddleware(*jwtService))
 		{
 			users.GET("/profile", userHandler.GetUser)
+			users.GET("", userHandler.GetUserQuery)
 		}
 
 		wallets := v1.Group("/wallets")
@@ -73,7 +87,7 @@ func NewRouter(
 			transactions.POST("/create", txnHandler.CreateTransaction)
 			transactions.POST("/submit", txnHandler.SubmitTransaction)
 		}
-	
+
 		balance := v1.Group("/balances")
 		balance.Use(middleware.AuthMiddleware(*jwtService))
 		{

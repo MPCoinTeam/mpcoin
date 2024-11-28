@@ -21,15 +21,15 @@ type WalletUseCase interface {
 }
 
 type walletUseCase struct {
-	walletRepo 		repository.WalletRepository
-	ethRepo    		repository.EthereumRepository
-	kafkaProducer 	*kafka.Writer
+	walletRepo    repository.WalletRepository
+	ethRepo       repository.EthereumRepository
+	kafkaProducer *kafka.Writer
 }
 
 func NewWalletUC(walletRepo repository.WalletRepository, ethRepo repository.EthereumRepository, kafkaProducer *kafka.Writer) WalletUseCase {
 	return &walletUseCase{
-		walletRepo: walletRepo, 
-		ethRepo: ethRepo,
+		walletRepo:    walletRepo,
+		ethRepo:       ethRepo,
 		kafkaProducer: kafkaProducer,
 	}
 }
@@ -57,7 +57,6 @@ func (uc *walletUseCase) CreateWallet(ctx context.Context, userID uuid.UUID) (do
 		EncryptedPrivateKey: encryptedPrivateKey,
 	}
 
-	
 	newWallet, err := uc.walletRepo.CreateWallet(ctx, wallet)
 	if err != nil {
 		return domain.Wallet{}, err
@@ -76,7 +75,7 @@ func (uc *walletUseCase) CreateWallet(ctx context.Context, userID uuid.UUID) (do
 	})
 	if err2 != nil {
 		log.Printf("Failed to publish message to Kafka: %v", err)
-	}else{
+	} else {
 		fmt.Println("Published message to Topic: ", uc.kafkaProducer.Topic)
 	}
 

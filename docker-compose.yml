@@ -81,6 +81,7 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
     ports:
       - "29092:29092"
+      - "9092:9092"
 
   redis:
     image: redis:latest

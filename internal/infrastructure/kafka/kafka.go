@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"mpc/internal/infrastructure/config"
-	"net"
-	"strconv"
 
 	"github.com/segmentio/kafka-go"
 )
@@ -36,7 +34,6 @@ func NewKafkaProducer(cfg *config.Config, opts ...KafkaOption) (*Writer, error) 
 	for _, opt := range opts {
 		opt(&options)
 	}
-
 	err := createTopicIfNotExists(cfg.Kafka.Brokers, options.Topic)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create topic: %w", err)
@@ -93,16 +90,6 @@ func createTopicIfNotExists(brokers []string, topic string) error {
 	}
 	defer conn.Close()
 
-	controller, err := conn.Controller()
-	if err != nil {
-		return err
-	}
-	controllerConn, err := kafka.Dial("tcp", net.JoinHostPort(controller.Host, strconv.Itoa(controller.Port)))
-	if err != nil {
-		return err
-	}
-	defer controllerConn.Close()
-
 	topicConfigs := []kafka.TopicConfig{
 		{
 			Topic:             topic,
@@ -111,7 +98,8 @@ func createTopicIfNotExists(brokers []string, topic string) error {
 		},
 	}
 
-	err = controllerConn.CreateTopics(topicConfigs...)
+	err = conn.CreateTopics(topicConfigs...)
+
 	if err != nil {
 		// If the topic already exists, it's not an error
 		if err != kafka.TopicAlreadyExists {

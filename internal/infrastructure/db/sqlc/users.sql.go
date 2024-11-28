@@ -97,6 +97,32 @@ func (q *Queries) GetUserWithWallet(ctx context.Context, id pgtype.UUID) (GetUse
 	return i, err
 }
 
+const getUserByAddress = `-- name: GetUserByAddress :one
+SELECT u.id, u.email, u.name, w.id
+FROM users u
+LEFT JOIN wallets w ON u.id = w.user_id
+WHERE w.address = $1 LIMIT 1
+`
+
+type GetUserByAddressRow struct {
+	ID      pgtype.UUID
+	Email   string
+	Name    string
+	ID_2    pgtype.UUID
+}
+
+func (q *Queries) GetUserByAddress(ctx context.Context, address string) (GetUserByAddressRow, error) {
+	row := q.db.QueryRow(ctx, getUserByAddress, address)
+	var i GetUserByAddressRow
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Name,
+		&i.ID_2,
+	)
+	return i, err
+}
+
 const updateUser = `-- name: UpdateUser :one
 UPDATE users
 SET email = $2, password_hash = $3, updated_at = CURRENT_TIMESTAMP

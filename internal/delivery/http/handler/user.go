@@ -17,7 +17,6 @@ func NewUserHandler(userUseCase usecase.UserUseCase) *UserHandler {
 	return &UserHandler{userUseCase: userUseCase}
 }
 
-
 // GetUser godoc
 // @Summary Get user profile
 // @Description Get user profile
@@ -39,6 +38,24 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 
 	//get user
 	user, err := h.userUseCase.GetUserWallet(c, userId)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to get user")
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, gin.H{"user": user})
+}
+
+func (h *UserHandler) GetUserQuery(c *gin.Context) {
+	//get user id from context
+	address := c.Query("address")
+	if address == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Address not found"})
+		return
+	}
+
+	//get user
+	user, err := h.userUseCase.GetUserByAddress(c, address)
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to get user")
 		return
