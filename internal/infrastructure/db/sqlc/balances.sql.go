@@ -28,7 +28,7 @@ WHERE
 `
 
 type GetBalancesByUserIdRow struct {
-	Balance         pgtype.Numeric
+	Balance         int64
 	ID              pgtype.UUID
 	ChainID         pgtype.UUID
 	ContractAddress string
@@ -80,7 +80,7 @@ RETURNING wallets.id, user_id, address, encrypted_private_key, created_at, walle
 `
 
 type UpdateBalanceParams struct {
-	Balance pgtype.Numeric
+	Balance int64
 	Address string
 	TokenID pgtype.UUID
 }
@@ -96,7 +96,7 @@ type UpdateBalanceRow struct {
 	WalletID            pgtype.UUID
 	ChainID             pgtype.UUID
 	TokenID             pgtype.UUID
-	Balance             pgtype.Numeric
+	Balance             int64
 	UpdatedAt_2         pgtype.Timestamptz
 }
 

@@ -70,8 +70,8 @@ func NewRouter(
 		{
 			transactions.GET("/", txnHandler.GetTransactions)
 			transactions.POST("/", txnHandler.CreateAndSubmitTransaction)
-			transactions.POST("/create", txnHandler.CreateTransaction)
-			transactions.POST("/submit", txnHandler.SubmitTransaction)
+			// transactions.POST("/create", txnHandler.CreateTransaction)
+			// transactions.POST("/submit", txnHandler.SubmitTransaction)
 		}
 	
 		balance := v1.Group("/balances")

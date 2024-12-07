@@ -135,10 +135,11 @@ func (uc *txnUseCase) CreateTransaction(ctx context.Context, userID uuid.UUID, p
 		ID:        txID,
 		WalletID:  params.WalletID,
 		ChainID:   params.ChainID,
-		Amount:    params.Amount,
+		Amount:    amountInWei.String(),
 		ToAddress: params.ToAddress,
 		TokenID:   params.TokenID,
 		Status:    domain.StatusPending,
+		FromAddress: wallet.Address,
 	}
 
 	_, err = uc.txnRepo.CreateTransaction(ctx, transaction)

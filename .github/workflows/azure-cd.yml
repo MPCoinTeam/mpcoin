@@ -1,0 +1,42 @@
+name: Deploy to Azure VM
+
+on:
+  push:
+    branches:
+      - main  # Hoặc branch bạn muốn deploy từ đó
+    
+    paths:
+      - 'cmd/**'
+      - 'internal/**'
+      - 'pkg/**'
+      - 'go.mod'
+      - 'go.sum'
+      - '_dockerfiles/**'
+      - 'docker-compose.yml'
+  
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.AZURE_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+
+    - name: Verify SSH connection
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.VM_USER }}@${{ secrets.VM_IP }} 'echo "SSH connection successful!"'
+
+    - name: Deploy application
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.VM_USER }}@${{ secrets.VM_IP }} << 'EOF'
+          cd mpcoin
+          git pull
+          docker compose up -d
+        EOF

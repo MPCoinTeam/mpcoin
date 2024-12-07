@@ -1,0 +1,22 @@
+# Bỏ qua thư mục node_modules
+node_modules/
+
+# Bỏ qua các tệp log
+*.log
+
+# Bỏ qua các tệp cấu hình của IDE
+.vscode/
+.idea/
+
+# Bỏ qua tệp docker-compose.yml và Dockerfile nếu không cần thiết trong build context
+docker-compose.yml
+Dockerfile
+
+# Bỏ qua tệp .git
+.git/
+
+# Bỏ qua các tệp môi trường
+.env
+
+# Bỏ qua thư mục test
+tests/

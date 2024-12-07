@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"math/big"
 	"mpc/internal/domain"
 	sqlc "mpc/internal/infrastructure/db/sqlc"
 	"mpc/internal/repository"
@@ -21,7 +22,7 @@ func (b *balanceRepository) UpdateBalance(ctx context.Context, params domain.Upd
 	_, err := q.UpdateBalance(ctx, sqlc.UpdateBalanceParams{
 		Address: params.Address.String(),
 		TokenID: pgtype.UUID{Bytes: params.TokenID, Valid: true},
-		Balance: pgtype.Numeric{Int: params.Balance, Valid: true},
+		Balance: params.Balance.Int64(),
 	})
 	if err != nil {
 		return err
@@ -42,7 +43,7 @@ func (b *balanceRepository) GetBalancesByUserId(ctx context.Context, userId uuid
 	for _, b := range balances {
 		result = append(result, domain.GetBalanceResponse{
 			TokenID: b.ID.Bytes,
-			Balance: *b.Balance.Int,
+			Balance: *big.NewInt(b.Balance),
 			ChainID: b.ChainID.Bytes,
 			ContractAddress: b.ContractAddress,
 			UpdatedAt:       b.UpdatedAt.Time,
@@ -50,7 +51,6 @@ func (b *balanceRepository) GetBalancesByUserId(ctx context.Context, userId uuid
 			TokenSymbol:     b.Symbol,
 			Decimals:        int64(b.Decimals),
 		})
-
 	}
 
 	return result, nil

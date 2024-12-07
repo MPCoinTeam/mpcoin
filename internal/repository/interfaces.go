@@ -38,6 +38,7 @@ type TransactionRepository interface {
 	GetPaginatedAllTokenTransactions(ctx context.Context, userId uuid.UUID, page, limit int) ([]domain.Transaction, error)
 	UpdateTransaction(ctx context.Context, transaction domain.Transaction) error
 	InsertSettledTransactions(ctx context.Context, transactions []domain.Transaction) error
+	DeleteTransaction(ctx context.Context, tx_hash string) (domain.Transaction, error)
 	DBTransaction
 }
 

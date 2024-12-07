@@ -1,6 +1,6 @@
 -- name: CreateTransaction :one
-INSERT INTO transactions (id, wallet_id , chain_id, to_address, amount, token_id, gas_price, gas_limit, nonce, status)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+INSERT INTO transactions (id, wallet_id , chain_id, to_address, amount, token_id, gas_price, gas_limit, nonce, from_address, status)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 RETURNING *;
 
 -- name: InsertSetteledTransaction :one
@@ -41,3 +41,9 @@ WHERE users.id = $1
 ORDER BY transactions.created_at DESC
 LIMIT $2
 OFFSET $3;
+
+
+-- name: DeleteTransaction :one
+DELETE FROM transactions
+WHERE tx_hash = $1
+RETURNING *;

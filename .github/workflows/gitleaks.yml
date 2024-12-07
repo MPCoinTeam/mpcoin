@@ -1,31 +1,26 @@
-name: GitLeaks Scan
+name: Gitleaks Scan
 
 on:
   push:
     branches:
-      - main
-      - develop
+      - main  # or the branch you want to monitor
   pull_request:
     branches:
-      - main
-      - develop
+      - main  # or the branch you want to monitor
 
 jobs:
   gitleaks:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Run GitLeaks
-        uses: zricethezav/gitleaks-action@v2.1.0
-        with:
-          config: ""
-          verbose: true
-          redacted: false
-
-      - name: Upload GitLeaks Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: gitleaks-report
-          path: gitleaks.json
+    - name: Run Gitleaks
+      uses: zricethezav/gitleaks-action@v2.1.0
+      with:
+        gitleaks_version: v8.0.0  # optional: specify a version of gitleaks
+        scan: true
+        scan_paths: "src/*,!src/internal/infrastructure/db/migrations/*"
+        config: .gitleaks.toml  # optional: specify custom config file
+        redacted: true  # optional: redacts secrets in the output (useful in public repos)

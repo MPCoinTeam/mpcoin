@@ -13,7 +13,7 @@ type Balance struct {
 	WalletID  pgtype.UUID
 	ChainID   pgtype.UUID
 	TokenID   pgtype.UUID
-	Balance   pgtype.Numeric
+	Balance   int64
 	UpdatedAt pgtype.Timestamptz
 }
 

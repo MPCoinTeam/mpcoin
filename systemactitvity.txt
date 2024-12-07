@@ -23,6 +23,7 @@
     if new chain added, restart sync app.
 
 5. tranfer token
+    
 
 
 6. add chain (admin auth)

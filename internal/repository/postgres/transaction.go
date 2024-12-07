@@ -16,6 +16,29 @@ type transactionRepository struct {
 	repository.BaseRepository
 }
 
+// DeleteTransaction implements repository.TransactionRepository.
+func (r *transactionRepository) DeleteTransaction(ctx context.Context, tnx_hash string) (domain.Transaction, error) {
+	q := sqlc.New(r.DB())
+	transaction, err := q.DeleteTransaction(ctx, pgtype.Text{String: tnx_hash, Valid: true})
+	if err != nil {
+		return domain.Transaction{}, err
+	}
+	return domain.Transaction{
+		ID:        transaction.ID.Bytes,
+		WalletID:  transaction.WalletID.Bytes,
+		ChainID:   transaction.ChainID.Bytes,
+		ToAddress: transaction.ToAddress,
+		Amount:    transaction.Amount,
+		TokenID:   transaction.TokenID.Bytes,
+		TxHash:    transaction.TxHash.String,
+		GasPrice:  transaction.GasPrice.String,
+		GasLimit:  transaction.GasLimit.String,
+		Nonce:     transaction.Nonce.Int64,
+		Status:    domain.Status(transaction.Status),
+	} , nil
+}
+
+
 func NewTransactionRepo(dbPool *pgxpool.Pool) repository.TransactionRepository {
 	return &transactionRepository{
 		BaseRepository: repository.NewBaseRepo(dbPool),
@@ -60,14 +83,13 @@ func (r *transactionRepository) GetPaginatedTransactions(ctx context.Context, us
 	return result, nil
 }
 
-
 // GetPaginatedAllTokenTransactions implements repository.TransactionRepository.
 func (r *transactionRepository) GetPaginatedAllTokenTransactions(ctx context.Context, userId uuid.UUID, page int, limit int) ([]domain.Transaction, error) {
 	q := sqlc.New(r.DB())
-	transactions, err := q.GetPaginatedTransactions(ctx, sqlc.GetPaginatedTransactionsParams{
-		ID:      pgtype.UUID{Bytes: userId, Valid: true}, //userId
-		Offset:  int32((page - 1) * limit),
-		Limit:   int32(limit),
+	transactions, err := q.GetPaginatedAllTokenTransactions(ctx, sqlc.GetPaginatedAllTokenTransactionsParams{
+		ID:     pgtype.UUID{Bytes: userId, Valid: true}, //userId
+		Offset: int32((page - 1) * limit),
+		Limit:  int32(limit),
 	})
 	if err != nil {
 		return nil, err
@@ -93,8 +115,6 @@ func (r *transactionRepository) GetPaginatedAllTokenTransactions(ctx context.Con
 	}
 	return result, nil
 }
-
-
 
 // Insert transactions that is persist on blockchain
 func (r *transactionRepository) InsertSettledTransactions(ctx context.Context, transactions []domain.Transaction) error {
@@ -131,16 +151,17 @@ func (r *transactionRepository) CreateTransaction(ctx context.Context, params do
 	err := r.WithTx(ctx, func(tx pgx.Tx) error {
 		q := sqlc.New(tx)
 		createdTransaction, err := q.CreateTransaction(ctx, sqlc.CreateTransactionParams{
-			ID:        pgtype.UUID{Bytes: params.ID, Valid: true},
-			WalletID:  pgtype.UUID{Bytes: params.WalletID, Valid: true},
-			ChainID:   pgtype.UUID{Bytes: params.ChainID, Valid: true},
-			ToAddress: params.ToAddress,
-			Amount:    params.Amount,
-			TokenID:   pgtype.UUID{Bytes: params.TokenID, Valid: true},
-			GasPrice:  pgtype.Text{String: params.GasPrice, Valid: true},
-			GasLimit:  pgtype.Text{String: params.GasLimit, Valid: true},
-			Nonce:     pgtype.Int8{Int64: params.Nonce, Valid: true},
-			Status:    string(params.Status),
+			ID:          pgtype.UUID{Bytes: params.ID, Valid: true},
+			WalletID:    pgtype.UUID{Bytes: params.WalletID, Valid: true},
+			ChainID:     pgtype.UUID{Bytes: params.ChainID, Valid: true},
+			ToAddress:   params.ToAddress,
+			Amount:      params.Amount,
+			TokenID:     pgtype.UUID{Bytes: params.TokenID, Valid: true},
+			GasPrice:    pgtype.Text{String: params.GasPrice, Valid: true},
+			GasLimit:    pgtype.Text{String: params.GasLimit, Valid: true},
+			Nonce:       pgtype.Int8{Int64: params.Nonce, Valid: true},
+			Status:      string(params.Status),
+			FromAddress: pgtype.Text{String: params.FromAddress, Valid: true},
 		})
 		if err != nil {
 			return err
@@ -208,3 +229,5 @@ func (r *transactionRepository) GetTransactionsByWalletID(ctx context.Context, w
 	// Implement the database operation here
 	panic("not implemented")
 }
+
+//

@@ -7,27 +7,29 @@ package db
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createTransaction = `-- name: CreateTransaction :one
-INSERT INTO transactions (id, wallet_id , chain_id, to_address, amount, token_id, gas_price, gas_limit, nonce, status)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+INSERT INTO transactions (id, wallet_id , chain_id, to_address, amount, token_id, gas_price, gas_limit, nonce, from_address, status)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 RETURNING id, wallet_id, chain_id, to_address, amount, token_id, gas_price, gas_limit, nonce, status, tx_hash, created_at, updated_at, from_address
 `
 
 type CreateTransactionParams struct {
-	ID        pgtype.UUID
-	WalletID  pgtype.UUID
-	ChainID   pgtype.UUID
-	ToAddress string
-	Amount    string
-	TokenID   pgtype.UUID
-	GasPrice  pgtype.Text
-	GasLimit  pgtype.Text
-	Nonce     pgtype.Int8
-	Status    string
+	ID          pgtype.UUID
+	WalletID    pgtype.UUID
+	ChainID     pgtype.UUID
+	ToAddress   string
+	Amount      string
+	TokenID     pgtype.UUID
+	GasPrice    pgtype.Text
+	GasLimit    pgtype.Text
+	Nonce       pgtype.Int8
+	FromAddress pgtype.Text
+	Status      string
 }
 
 func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error) {
@@ -41,8 +43,38 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		arg.GasPrice,
 		arg.GasLimit,
 		arg.Nonce,
+		arg.FromAddress,
 		arg.Status,
 	)
+	var i Transaction
+	err := row.Scan(
+		&i.ID,
+		&i.WalletID,
+		&i.ChainID,
+		&i.ToAddress,
+		&i.Amount,
+		&i.TokenID,
+		&i.GasPrice,
+		&i.GasLimit,
+		&i.Nonce,
+		&i.Status,
+		&i.TxHash,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.FromAddress,
+	)
+	return i, err
+}
+
+const deleteTransaction = `-- name: DeleteTransaction :one
+DELETE FROM transactions
+WHERE tx_hash = $1
+RETURNING id, wallet_id, chain_id, to_address, amount, token_id, gas_price, gas_limit, nonce, status, tx_hash, created_at, updated_at, from_address
+`
+
+func (q *Queries) DeleteTransaction(ctx context.Context, txHash pgtype.Text) (Transaction, error) {
+	row := q.db.QueryRow(ctx, deleteTransaction, txHash)
+	fmt.Print(row)
 	var i Transaction
 	err := row.Scan(
 		&i.ID,

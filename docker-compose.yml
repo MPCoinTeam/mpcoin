@@ -7,9 +7,12 @@ services:
       dockerfile: ./_dockerfiles/backend-services.docker
     container_name: backend-services
     depends_on:
-      - kafka
-      - postgre-db
-      - redis
+      kafka:
+        condition: service_healthy
+      postgre-db:
+        condition: service_started
+      redis:
+        condition: service_started
     restart: on-failure:3
     environment:
       - DB_HOST=postgre-db
@@ -25,7 +28,7 @@ services:
       - ETHEREUM_URL=https://sepolia.infura.io/v3/6c89fb7fa351451f939eea9da6bee755
       - GOOSE_DRIVER=postgres
       - GOOSE_DBSTRING=host=postgre-db user=user password=password dbname=mpcwallet port=5432 sslmode=disable TimeZone=UTC
-      - ETHEREUM_SECRET_KEY=LEi6RTO6R5gIZqFBBtB79BGHC8BHziGW 
+      - ETHEREUM_SECRET_KEY=${ETHEREUM_SECRET_KEY} 
     ports:
       - "8080:8080"
 
@@ -66,7 +69,6 @@ services:
     container_name: kafka
     depends_on:
       - zookeeper
-    restart: on-failure:3
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -78,6 +80,18 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
     ports:
       - "9092:9092"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "kafka-topics",
+          "--list",
+          "--bootstrap-server",
+          "localhost:9092",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 20
 
   redis:
     image: redis:latest

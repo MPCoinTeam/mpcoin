@@ -60,6 +60,8 @@ func (h *TxnHandler) GetTransactions(c *gin.Context) {
 
 	// Get transactions
 	txnList, err := h.txnUC.GetPaginatedTransactions(c.Request.Context(), userId, tokenId, page, perPage)
+	
+	
 
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to get transactions: "+err.Error())
